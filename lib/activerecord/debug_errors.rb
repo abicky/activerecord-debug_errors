@@ -1,8 +1,9 @@
+require "active_record"
+require "activerecord/debug_errors/ext/connection_adapters/abstract_mysql_adapter"
+require "activerecord/debug_errors/ext/connection_adapters/connection_pool"
 require "activerecord/debug_errors/version"
 
-module Activerecord
+module ActiveRecord
   module DebugErrors
-    class Error < StandardError; end
-    # Your code goes here...
   end
 end

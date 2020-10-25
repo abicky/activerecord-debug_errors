@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        ruby-version:
+          - '2.6'
+          - '2.7'
+    services:
+      mysql:
+        image: mysql:5.7
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd "mysqladmin ping -h localhost"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: test
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Ruby ${{ matrix.ruby-version }}
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: ${{ matrix.ruby-version }}
+      - uses: actions/cache@v2
+        with:
+          path: vendor/bundle
+          key: ${{ runner.os }}-gems-${{ matrix.ruby-version }}-${{ hashFiles('activerecord-debug_errors.gemspec', '**/Gemfile') }}
+          restore-keys: |
+            ${{ runner.os }}-gems-${{ matrix.ruby-version }}-
+      - name: Build and test with Rake
+        run: |
+          bundle config path vendor/bundle
+          bundle install --jobs 4 --retry 3
+          bundle exec rake
+        env:
+          MYSQL_HOST: 127.0.0.1
+          MYSQL_USERNAME: root
+          MYSQL_PASSWORD: password
+          MYSQL_DATABASE: test
