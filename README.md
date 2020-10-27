@@ -32,7 +32,7 @@ By loading the gem, you can see useful debug logs on errors as described below.
 
 ### ActiveRecord::LockWaitTimeout
 
-When `ActiveRecord::LockWaitTimeout` occurs, you can see a log like below:
+If you use MySQL and when `ActiveRecord::LockWaitTimeout` occurs, you can see a log like below:
 
 ```
 ActiveRecord::LockWaitTimeout occurred:
@@ -77,7 +77,7 @@ In the preceding log, you can find that there were two long transactions. The fi
 
 ### ActiveRecord::Deadlocked
 
-When `ActiveRecord::Deadlocked` occurs, you can see the information of the latest detected deadlock:
+If you use MySQL and when `ActiveRecord::Deadlocked` occurs, you can see the information of the latest detected deadlock:
 
 ```
 ActiveRecord::Deadlocked occurred:
@@ -161,6 +161,7 @@ ActiveRecord::ConnectionTimeoutError occured:
         /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:30:in `block (6 levels) in <top (required)>'
 ```
 
+In the preceding log, you can find that there were five connection owners and three other threads. The first owner was the main thread (Thread:0x00007fbda205fa70) and the other owners are dead threads.
 
 ## Development
 
