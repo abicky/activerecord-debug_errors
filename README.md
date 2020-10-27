@@ -124,35 +124,41 @@ When `ActiveRecord::ConnectionTimeoutError` occurs, you can see the information 
 
 ```
 ActiveRecord::ConnectionTimeoutError occured:
-  Thread #<Thread:0x00007fce2105fa90 sleep_forever> status=sleep priority=0
-      /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:25:in `join'
-      /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:25:in `each'
-      /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:25:in `block (4 levels) in <top (required)>'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/matchers/built_in/raise_error.rb:52:in `matches?'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:50:in `block in handle_matcher'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:27:in `with_matcher'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:48:in `handle_matcher'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/expectation_target.rb:65:in `to'
-      /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/expectation_target.rb:101:in `to'
-      /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:20:in `block (3 levels) in <top (required)>'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:262:in `instance_exec'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:262:in `block in run'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:508:in `block in with_around_and_singleton_context_hooks'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:465:in `block in with_around_example_hooks'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/hooks.rb:486:in `block in run'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/hooks.rb:626:in `block in run_around_example_hooks_for'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:350:in `call'
-      /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:13:in `block (2 levels) in <top (required)>'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:455:in `instance_exec'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/example.rb:455:in `instance_exec'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/hooks.rb:390:in `execute_with'
+  connection owners:
+    Thread #<Thread:0x00007fbda205fa70 sleep_forever> status=sleep priority=0
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:32:in `join'
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:32:in `each'
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:32:in `block (4 levels) in <top (required)>'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/matchers/built_in/raise_error.rb:52:in `matches?'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:50:in `block in handle_matcher'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:27:in `with_matcher'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/handler.rb:48:in `handle_matcher'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/expectation_target.rb:65:in `to'
+        /path/to/ruby/gems/2.7.0/gems/rspec-expectations-3.9.3/lib/rspec/expectations/expectation_target.rb:101:in `to'
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:26:in `block (3 levels) in <top (required)>'
 -- snip --
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/lib/rspec/core/runner.rb:45:in `invoke'
-      /path/to/ruby/gems/2.7.0/gems/rspec-core-3.9.3/exe/rspec:4:in `<main>'
-  Thread #<Thread:0x00007fce23b80cb0 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:22 dead> status=false priority=0
-  Thread #<Thread:0x00007fce23b809e0 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:22 dead> status=false priority=0
-  Thread #<Thread:0x00007fce23b806e8 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:22 dead> status=false priority=0
-  Thread #<Thread:0x00007fce23b804b8 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:22 dead> status=false priority=0
+        /path/to/bin/rspec:23:in `load'
+        /path/to/bin/rspec:23:in `<main>'
+    Thread #<Thread:0x00007fbda4908008 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:29 dead> status=false priority=0
+    Thread #<Thread:0x00007fbda4909688 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:29 dead> status=false priority=0
+    Thread #<Thread:0x00007fbda4908170 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:29 dead> status=false priority=0
+    Thread #<Thread:0x00007fbda48fbd58 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:29 dead> status=false priority=0
+  other threads:
+    Thread #<Thread:0x00007fbda52b3ad0 /path/to/ruby/gems/2.7.0/gems/activerecord-6.0.3.4/lib/active_record/connection_adapters/abstract/connection_pool.rb:334 sleep> status=sleep priority=0
+        /path/to/ruby/gems/2.7.0/gems/activerecord-6.0.3.4/lib/active_record/connection_adapters/abstract/connection_pool.rb:337:in `sleep'
+        /path/to/ruby/gems/2.7.0/gems/activerecord-6.0.3.4/lib/active_record/connection_adapters/abstract/connection_pool.rb:337:in `block in spawn_thread'
+    Thread #<Thread:0x00007fbda5100170 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:24 sleep> status=sleep priority=0
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:24:in `sleep'
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:24:in `block (4 levels) in <top (required)>'
+    Thread #<Thread:0x00007fbda48fbc40 /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:29 run> status=run priority=0
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:22:in `backtrace'
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:22:in `block in dump_threads'
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:34:in `each'
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:34:in `dump_threads'
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:9:in `rescue in acquire_connection'
+        /path/to/activerecord-debug_errors/lib/activerecord/debug_errors/ext/connection_adapters/connection_pool.rb:6:in `acquire_connection'
+        /path/to/ruby/gems/2.7.0/gems/activerecord-6.0.3.4/lib/active_record/connection_adapters/abstract/connection_pool.rb:593:in `checkout'
+        /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:30:in `block (6 levels) in <top (required)>'
 ```
 
 

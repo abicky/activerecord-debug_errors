@@ -6,21 +6,32 @@ module ActiveRecord
       def acquire_connection(*args)
         super
       rescue ActiveRecord::ConnectionTimeoutError
-        display_connection_owners if ActiveRecord::Base.logger
+        dump_threads if ActiveRecord::Base.logger
         raise
       end
 
       private
 
-      def display_connection_owners
+      def dump_threads
         logger = ActiveRecord::Base.logger
 
         logger.error "ActiveRecord::ConnectionTimeoutError occured:"
-        ActiveRecord::Base.connection_pool.connections.map(&:owner).each do |thread|
-          logger.error "  Thread #{thread} status=#{thread.status} priority=#{thread.priority}"
+
+        dump_thread = ->(thread) {
+          logger.error "    Thread #{thread} status=#{thread.status} priority=#{thread.priority}"
           thread.backtrace&.each do |bt|
-            logger.error "      #{bt}"
+            logger.error "        #{bt}"
           end
+        }
+
+        owners = ActiveRecord::Base.connection_pool.connections.map(&:owner)
+        logger.error "  connection owners:"
+        owners.each(&dump_thread)
+
+        other_threads = Thread.list - owners
+        unless other_threads.empty?
+          logger.error "  other threads:"
+          other_threads.each(&dump_thread)
         end
       end
     end
