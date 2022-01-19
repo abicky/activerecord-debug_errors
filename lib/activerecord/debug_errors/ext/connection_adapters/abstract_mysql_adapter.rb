@@ -49,7 +49,14 @@ module ActiveRecord
       end
 
       def display_innodb_status_section(section_name)
-        status = ActiveRecord::Base.connection.execute("SHOW ENGINE INNODB STATUS").first[2]
+        sql = "SHOW ENGINE INNODB STATUS"
+        status = nil
+        begin
+          status = ActiveRecord::Base.connection.execute(sql).first[2]
+        rescue ActiveRecord::StatementInvalid => e
+          logger.error "Failed to execute '#{sql}': #{e.message}"
+          return
+        end
 
         prev_line = nil
         in_deadlock_section = false

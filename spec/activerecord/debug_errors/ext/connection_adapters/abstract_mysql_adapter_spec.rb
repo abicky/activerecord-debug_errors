@@ -18,29 +18,50 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
 
   describe "#execute" do
     context "when ActiveRecord::Deadlocked occurs" do
-      it "displays latest detected deadlock" do
+      def cause_deadlock(role:)
         ths = []
         ths << Thread.new do
-          User.transaction do
-            User.lock.find_by!(name: 'foo')
-            sleep 0.1
-            User.lock.find_by!(name: 'bar')
+          ActiveRecord::Base.connected_to(role: role) do
+            User.transaction do
+              User.lock.find_by!(name: 'foo')
+              sleep 0.1
+              User.lock.find_by!(name: 'bar')
+            end
           end
         end
 
         ths << Thread.new do
-          User.transaction do
-            User.lock.find_by!(name: 'bar')
-            sleep 0.1
-            User.lock.find_by!(name: 'foo')
+          ActiveRecord::Base.connected_to(role: role) do
+            User.transaction do
+              User.lock.find_by!(name: 'bar')
+              sleep 0.1
+              User.lock.find_by!(name: 'foo')
+            end
           end
         end
 
-        expect {
-          ths.each(&:join)
-        }.to raise_error(ActiveRecord::Deadlocked)
-        expect(log.string).to include("LATEST DETECTED DEADLOCK")
-        expect(log.string).to include("WE ROLL BACK TRANSACTION")
+        ths.each(&:join)
+      end
+
+      context "when the user has the permission to execute 'SHOW ENGINE INNODB STATUS'" do
+        it "displays latest detected deadlock" do
+          expect {
+            cause_deadlock(role: :writing)
+          }.to raise_error(ActiveRecord::Deadlocked)
+          expect(log.string).to include("LATEST DETECTED DEADLOCK")
+          expect(log.string).to include("WE ROLL BACK TRANSACTION")
+        end
+      end
+
+      context "when the user doesn't have the permission to execute 'SHOW ENGINE INNODB STATUS'" do
+        it "displays an error message" do
+          expect {
+            ActiveRecord::Base.connected_to(role: :reading) do
+              cause_deadlock(role: :reading)
+            end
+          }.to raise_error(ActiveRecord::Deadlocked)
+          expect(log.string).to include("Failed to execute")
+        end
       end
     end
 

@@ -118,6 +118,8 @@ Record lock, heap no 2 PHYSICAL RECORD: n_fields 2; compact format; info bits 0
 *** WE ROLL BACK TRANSACTION (2)
 ```
 
+Note that the user requires the PROCESS priviledge to collect the information.
+
 ### ActiveRecord::ConnectionTimeoutError
 
 When `ActiveRecord::ConnectionTimeoutError` occurs, you can see the information of connection owners (threads):
