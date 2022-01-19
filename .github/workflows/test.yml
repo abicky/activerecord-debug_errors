@@ -15,6 +15,16 @@ jobs:
         ruby-version:
           - '2.6'
           - '2.7'
+          - '3.0'
+          - '3.1'
+        activerecord-version:
+          - '6'
+          - '7'
+        exclude:
+          - # activerecord-7 doesn't support Ruby 2.6
+            ruby-version: '2.6'
+            activerecord-version: '7'
+
     services:
       mysql:
         image: mysql:5.7
@@ -28,18 +38,17 @@ jobs:
         env:
           MYSQL_ROOT_PASSWORD: password
           MYSQL_DATABASE: test
+
+    env:
+      BUNDLE_GEMFILE: gemfiles/activerecord_${{ matrix.activerecord-version }}.gemfile
+
     steps:
       - uses: actions/checkout@v2
       - name: Set up Ruby ${{ matrix.ruby-version }}
-        uses: actions/setup-ruby@v1
+        uses: ruby/setup-ruby@v1
         with:
           ruby-version: ${{ matrix.ruby-version }}
-      - uses: actions/cache@v2
-        with:
-          path: vendor/bundle
-          key: ${{ runner.os }}-gems-${{ matrix.ruby-version }}-${{ hashFiles('activerecord-debug_errors.gemspec', '**/Gemfile') }}
-          restore-keys: |
-            ${{ runner.os }}-gems-${{ matrix.ruby-version }}-
+          bundler-cache: true
       - name: Build and test with Rake
         run: |
           bundle config path vendor/bundle

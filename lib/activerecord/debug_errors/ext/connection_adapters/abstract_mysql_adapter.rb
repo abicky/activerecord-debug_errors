@@ -1,10 +1,18 @@
 # frozen_string_literal: true
+require "active_record/connection_adapters/abstract_mysql_adapter"
 
 module ActiveRecord
   module DebugErrors
     module DisplayMySQLInformation
-      def execute(*args)
-        super
+      # Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
+      # cf. https://github.com/rails/rails/pull/43097
+      if ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.private_method_defined?(:raw_execute)
+        method_name = :raw_execute
+      else
+        method_name = :execute
+      end
+      define_method(method_name) do |*args, **kwargs|
+        super(*args, **kwargs)
       rescue ActiveRecord::Deadlocked
         if logger
           logger.error "ActiveRecord::Deadlocked occurred:"
@@ -19,6 +27,7 @@ module ActiveRecord
         end
         raise
       end
+      private method_name if method_name == :raw_execute
 
       private
 
@@ -64,7 +73,6 @@ module ActiveRecord
   end
 end
 
-require "active_record/connection_adapters/abstract_mysql_adapter"
 class ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter
   prepend ActiveRecord::DebugErrors::DisplayMySQLInformation
 end
