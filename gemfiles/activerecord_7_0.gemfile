@@ -1,0 +1,2 @@
+eval_gemfile("../Gemfile")
+gem "activerecord", "~> 7.0.0"
