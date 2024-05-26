@@ -4,10 +4,16 @@ require "active_record/connection_adapters/abstract_mysql_adapter"
 module ActiveRecord
   module DebugErrors
     module DisplayMySQLInformation
-      # For Rails 6.0 or 6.1. Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
-      # cf. https://github.com/rails/rails/pull/43097
-      if ActiveRecord.version < Gem::Version.new("7.0.0")
-        def execute(*args, **kwargs)
+      # For Rails 6.0, 6.1, 7.0.
+      if ActiveRecord.version < Gem::Version.new("7.1.0")
+        # Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
+        # cf. https://github.com/rails/rails/pull/43097
+        if ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.private_method_defined?(:raw_execute)
+          method_name = :raw_execute
+        else
+          method_name = :execute
+        end
+        define_method(method_name) do |*args, **kwargs|
           super(*args, **kwargs)
         rescue ActiveRecord::Deadlocked
           handle_deadlocked
@@ -16,20 +22,21 @@ module ActiveRecord
           handle_lock_wait_timeout
           raise
         end
+        private method_name if method_name == :raw_execute
+      elsif ActiveRecord.version >= Gem::Version.new("7.1.0")
+        # For Rails 7.1 or later. Override `ActiveRecord::ConnectionAdapters::AbstractAdapter#translate_exception_class`
+        # so that it obtains an error happened on query executions.
+        private def translate_exception_class(*args, **kwargs)
+          if  args[0].is_a?(ActiveRecord::Deadlocked)
+            handle_deadlocked
+          elsif args[0].is_a?(ActiveRecord::LockWaitTimeout)
+            handle_lock_wait_timeout
+          end
+          super(*args, **kwargs)
+        end
       end
 
       private
-
-      # For Rails 7.0 or later. Override `ActiveRecord::ConnectionAdapters::AbstractAdapter#translate_exception_class`
-      # so that it obtains an error happened on query executions.
-      def translate_exception_class(*args, **kwargs)
-        if  args[0].is_a?(ActiveRecord::Deadlocked)
-          handle_deadlocked
-        elsif args[0].is_a?(ActiveRecord::LockWaitTimeout)
-          handle_lock_wait_timeout
-        end
-        super(*args, **kwargs)
-      end
 
       def handle_deadlocked
         if logger
