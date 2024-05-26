@@ -125,7 +125,7 @@ Note that the user requires the PROCESS priviledge to collect the information.
 When `ActiveRecord::ConnectionTimeoutError` occurs, you can see the information of connection owners (threads):
 
 ```
-ActiveRecord::ConnectionTimeoutError occured:
+ActiveRecord::ConnectionTimeoutError occurred:
   connection owners:
     Thread #<Thread:0x00007fbda205fa70 sleep_forever> status=sleep priority=0
         /path/to/activerecord-debug_errors/spec/activerecord/debug_errors/ext/connection_adapters/connection_pool_spec.rb:32:in `join'

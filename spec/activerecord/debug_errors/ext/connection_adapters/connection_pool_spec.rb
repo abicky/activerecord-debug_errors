@@ -29,7 +29,7 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
         end.each(&:join)
       }.to raise_error(ActiveRecord::ConnectionTimeoutError)
 
-      expect(log.string).to include("ActiveRecord::ConnectionTimeoutError occured:")
+      expect(log.string).to include("ActiveRecord::ConnectionTimeoutError occurred:")
       expect(log.string).to include("connection owners:")
       expect(log.string).to include("other threads")
 
