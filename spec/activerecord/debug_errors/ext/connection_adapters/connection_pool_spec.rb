@@ -18,16 +18,22 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
 
   describe "#acquire_connection" do
     it "displays connection owners and other threads" do
-      ActiveRecord::Base.connection_pool.checkout_timeout = 0.001 # no need to delay test suite by waiting the whole full default timeout
-
       Thread.new { sleep 10 } # another thread
+
+      mutex = Mutex.new
+      cv = ConditionVariable.new
 
       expect {
         ActiveRecord::Base.connection # Ensure to acquire a connection
         Array.new(ActiveRecord::Base.connection_pool.size) do
           Thread.new do
-            ActiveRecord::Base.connection_pool.checkout
-            sleep 0.001
+            mutex.synchronize do
+              ActiveRecord::Base.connection_pool.checkout(0.1)
+              cv.wait(mutex, 1)
+            rescue
+              cv.broadcast
+              raise
+            end
           end
         end.each(&:join)
       }.to raise_error(ActiveRecord::ConnectionTimeoutError)
