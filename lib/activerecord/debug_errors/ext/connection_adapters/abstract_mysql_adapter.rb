@@ -4,54 +4,32 @@ require "active_record/connection_adapters/abstract_mysql_adapter"
 module ActiveRecord
   module DebugErrors
     module DisplayMySQLInformation
-      # For Rails 6.0, 6.1, 7.0.
-      if ActiveRecord.version < Gem::Version.new("7.1.0")
-        # Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
-        # cf. https://github.com/rails/rails/pull/43097
-        if ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.private_method_defined?(:raw_execute)
-          method_name = :raw_execute
-        else
-          method_name = :execute
-        end
-        define_method(method_name) do |*args, **kwargs|
-          super(*args, **kwargs)
-        rescue ActiveRecord::Deadlocked
-          handle_deadlocked
-          raise
-        rescue ActiveRecord::LockWaitTimeout
-          handle_lock_wait_timeout
-          raise
-        end
-        private method_name if method_name == :raw_execute
-      elsif ActiveRecord.version >= Gem::Version.new("7.1.0")
-        # For Rails 7.1 or later. Override `ActiveRecord::ConnectionAdapters::AbstractAdapter#translate_exception_class`
-        # so that it obtains an error happened on query executions.
-        private def translate_exception_class(*args, **kwargs)
-          if  args[0].is_a?(ActiveRecord::Deadlocked)
-            handle_deadlocked
-          elsif args[0].is_a?(ActiveRecord::LockWaitTimeout)
-            handle_lock_wait_timeout
-          end
-          super(*args, **kwargs)
-        end
+      # Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
+      # cf. https://github.com/rails/rails/pull/43097
+      if ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.private_method_defined?(:raw_execute)
+        method_name = :raw_execute
+      else
+        method_name = :execute
       end
-
-      private
-
-      def handle_deadlocked
+      define_method(method_name) do |*args, **kwargs|
+        super(*args, **kwargs)
+      rescue ActiveRecord::Deadlocked
         if logger
           logger.error "ActiveRecord::Deadlocked occurred:"
           display_latest_detected_deadlock
         end
-      end
-
-      def handle_lock_wait_timeout
+        raise
+      rescue ActiveRecord::LockWaitTimeout
         if logger
           logger.error "ActiveRecord::LockWaitTimeout occurred:"
           display_transactions
           display_processlist
         end
+        raise
       end
+      private method_name if method_name == :raw_execute
+
+      private
 
       def display_latest_detected_deadlock
         display_innodb_status_section("LATEST DETECTED DEADLOCK")
@@ -102,6 +80,13 @@ module ActiveRecord
   end
 end
 
+ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.descendants.each do |adapter|
+  adapter.prepend(ActiveRecord::DebugErrors::DisplayMySQLInformation)
+end
+
 class ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter
-  prepend ActiveRecord::DebugErrors::DisplayMySQLInformation
+  def self.inherited(base)
+    super
+    base.prepend(ActiveRecord::DebugErrors::DisplayMySQLInformation)
+  end
 end
