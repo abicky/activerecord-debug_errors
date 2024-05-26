@@ -80,6 +80,13 @@ module ActiveRecord
   end
 end
 
+ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter.descendants.each do |adapter|
+  adapter.prepend(ActiveRecord::DebugErrors::DisplayMySQLInformation)
+end
+
 class ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter
-  prepend ActiveRecord::DebugErrors::DisplayMySQLInformation
+  def self.inherited(base)
+    super
+    base.prepend(ActiveRecord::DebugErrors::DisplayMySQLInformation)
+  end
 end

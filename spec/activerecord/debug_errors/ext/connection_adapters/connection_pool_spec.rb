@@ -20,11 +20,20 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
     it "displays connection owners and other threads" do
       Thread.new { sleep 10 } # another thread
 
+      mutex = Mutex.new
+      cv = ConditionVariable.new
+
       expect {
         ActiveRecord::Base.connection # Ensure to acquire a connection
         Array.new(ActiveRecord::Base.connection_pool.size) do
           Thread.new do
-            ActiveRecord::Base.connection_pool.checkout(0.1)
+            mutex.synchronize do
+              ActiveRecord::Base.connection_pool.checkout(0.1)
+              cv.wait(mutex, 1)
+            rescue
+              cv.broadcast
+              raise
+            end
           end
         end.each(&:join)
       }.to raise_error(ActiveRecord::ConnectionTimeoutError)
