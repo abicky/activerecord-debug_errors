@@ -4,24 +4,46 @@ require "active_record/connection_adapters/abstract_mysql_adapter"
 module ActiveRecord
   module DebugErrors
     module DisplayMySQLInformation
+      # For Rails 6.0 or 6.1. Rails 7 or later never calls ActiveRecord::ConnectionAdapters::AbstractMysqlAdapter#execute
+      # cf. https://github.com/rails/rails/pull/43097
+      if ActiveRecord.version < Gem::Version.new("7.0.0")
+        def execute(*args, **kwargs)
+          super(*args, **kwargs)
+        rescue ActiveRecord::Deadlocked
+          handle_deadlocked
+          raise
+        rescue ActiveRecord::LockWaitTimeout
+          handle_lock_wait_timeout
+          raise
+        end
+      end
+
       private
 
-      # Override `ActiveRecord::ConnectionAdapters::AbstractAdapter#translate_exception_class`
+      # For Rails 7.0 or later. Override `ActiveRecord::ConnectionAdapters::AbstractAdapter#translate_exception_class`
       # so that it obtains an error happened on query executions.
       def translate_exception_class(*args, **kwargs)
         if  args[0].is_a?(ActiveRecord::Deadlocked)
-          if logger
-            logger.error "ActiveRecord::Deadlocked occurred:"
-            display_latest_detected_deadlock
-          end
+          handle_deadlocked
         elsif args[0].is_a?(ActiveRecord::LockWaitTimeout)
-          if logger
-            logger.error "ActiveRecord::LockWaitTimeout occurred:"
-            display_transactions
-            display_processlist
-          end
+          handle_lock_wait_timeout
         end
         super(*args, **kwargs)
+      end
+
+      def handle_deadlocked
+        if logger
+          logger.error "ActiveRecord::Deadlocked occurred:"
+          display_latest_detected_deadlock
+        end
+      end
+
+      def handle_lock_wait_timeout
+        if logger
+          logger.error "ActiveRecord::LockWaitTimeout occurred:"
+          display_transactions
+          display_processlist
+        end
       end
 
       def display_latest_detected_deadlock
