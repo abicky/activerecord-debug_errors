@@ -15,7 +15,7 @@ module ActiveRecord
       def dump_threads
         logger = ActiveRecord::Base.logger
 
-        logger.error "ActiveRecord::ConnectionTimeoutError occured:"
+        logger.error "ActiveRecord::ConnectionTimeoutError occurred:"
 
         dump_thread = ->(thread) {
           logger.error "    Thread #{thread} status=#{thread.status} priority=#{thread.priority}"
