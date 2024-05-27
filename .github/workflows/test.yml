@@ -28,6 +28,9 @@ jobs:
           - '7_0'
           - '7_1'
           - 'latest'
+        mysql-version:
+          - '5.7'
+          - '8.0'
         exclude:
           # activerecord-7 doesn't support Ruby 2.6
           - ruby-version: '2.6'
@@ -37,7 +40,7 @@ jobs:
 
     services:
       mysql:
-        image: mysql:5.7
+        image: mysql:${{ matrix.mysql-version }}
         ports:
           - 3306:3306
         options: >-
