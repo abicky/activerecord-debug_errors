@@ -1,6 +1,6 @@
 # ActiveRecord::DebugErrors
 
-![](https://github.com/abicky/activerecord-debug_errors/workflows/CI/badge.svg?branch=master)
+[![CI](https://github.com/abicky/activerecord-debug_errors/actions/workflows/test.yml/badge.svg?branch=master)](https://github.com/abicky/activerecord-debug_errors/actions/workflows/test.yml)
 
 ActiveRecord::DebugErrors is an extension of activerecord to display useful debug logs on errors.
 
