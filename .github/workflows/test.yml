@@ -24,10 +24,15 @@ jobs:
           - '6_1'
           - '7_0'
           - '7_1'
+          - '7_2'
           - 'latest'
         mysql-version:
           - '5.7'
           - '8.0'
+        exclude:
+          # activerecord-7 doesn't support Ruby 2.6
+          - ruby-version: '3.0'
+            activerecord-version: '7_2'
 
     services:
       mysql:
