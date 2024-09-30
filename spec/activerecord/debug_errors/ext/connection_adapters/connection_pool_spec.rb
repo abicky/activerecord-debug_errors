@@ -1,4 +1,5 @@
 require "spec_helper"
+require "support/cyclic_barrier"
 
 RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
   let(:log) { StringIO.new }
@@ -20,20 +21,18 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
     it "displays connection owners and other threads" do
       Thread.new { sleep 10 } # another thread
 
-      mutex = Mutex.new
-      cv = ConditionVariable.new
+      barrier = CyclicBarrier.new(ActiveRecord::Base.connection_pool.size)
 
       expect {
         ActiveRecord::Base.connection # Ensure to acquire a connection
         Array.new(ActiveRecord::Base.connection_pool.size) do
           Thread.new do
-            mutex.synchronize do
-              ActiveRecord::Base.connection_pool.checkout(0.1)
-              cv.wait(mutex, 1)
-            rescue
-              cv.broadcast
-              raise
-            end
+            ActiveRecord::Base.connection_pool.checkout(0.1)
+            barrier.await(1)
+          rescue Timeout::Error
+            # CyclicBarrier#await is expected to raise Timeout::Error
+            # because it is not called ActiveRecord::Base.connection_pool.size times
+            # due to ActiveRecord::ConnectionTimeoutError
           end
         end.each(&:join)
       }.to raise_error(ActiveRecord::ConnectionTimeoutError)
