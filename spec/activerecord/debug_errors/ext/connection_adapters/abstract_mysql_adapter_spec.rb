@@ -1,4 +1,5 @@
 require "spec_helper"
+require "support/cyclic_barrier"
 
 RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
   let(:log) { StringIO.new }
@@ -19,12 +20,14 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
   describe "#execute" do
     context "when ActiveRecord::Deadlocked occurs" do
       def cause_deadlock(role:)
+        barrier = CyclicBarrier.new(2)
+
         ths = []
         ths << Thread.new do
           ActiveRecord::Base.connected_to(role: role) do
             User.transaction do
               User.lock.find_by!(name: 'foo')
-              sleep 0.1
+              barrier.await(1)
               User.lock.find_by!(name: 'bar')
             end
           end
@@ -34,7 +37,7 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
           ActiveRecord::Base.connected_to(role: role) do
             User.transaction do
               User.lock.find_by!(name: 'bar')
-              sleep 0.1
+              barrier.await(1)
               User.lock.find_by!(name: 'foo')
             end
           end
@@ -67,18 +70,15 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
 
     context "when ActiveRecord::LockWaitTimeout occurs" do
       it "displays transactions and processlist" do
-        ths = []
-        ths << Thread.new do
-          User.transaction do
-            User.lock.find_by!(name: 'foo')
-            sleep 2
-          end
-        end
+        barrier = CyclicBarrier.new(2)
 
-        ths << Thread.new do
-          User.transaction do
-            User.lock.find_by!(name: 'foo')
-            sleep 2
+        ths = Array.new(2) do
+          Thread.new do
+            User.transaction do
+              barrier.await(1)
+              User.lock.find_by!(name: 'foo')
+              sleep 2
+            end
           end
         end
 
