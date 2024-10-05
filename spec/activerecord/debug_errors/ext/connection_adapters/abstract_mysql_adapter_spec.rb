@@ -74,10 +74,11 @@ RSpec.describe ActiveRecord::DebugErrors::DisplayConnectionOwners do
 
         ths = Array.new(2) do
           Thread.new do
+            Thread.current.abort_on_exception = true
             User.transaction do
               barrier.await(1)
               User.lock.find_by!(name: 'foo')
-              sleep 2
+              sleep 5
             end
           end
         end
