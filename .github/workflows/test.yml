@@ -25,15 +25,25 @@ jobs:
           - '7_0'
           - '7_1'
           - '7_2'
+          - '8_0'
           - 'latest'
         mysql-version:
           - '5.7'
           - '8.0'
         exclude:
-          # activerecord-7.2 requires Ruby 3.1.0 or later
+          # Exclude conditions that don't meat the minimal requirement
           - ruby-version: '3.0'
             activerecord-version: '7_2'
+          - ruby-version: '3.0'
+            activerecord-version: '8_0'
+          - ruby-version: '3.1'
+            activerecord-version: '8_0'
 
+          # Exclude duplicate conditions
+          - ruby-version: '3.0'
+            activerecord-version: 'latest' # equivalent to '7_1'
+          - ruby-version: '3.1'
+            activerecord-version: 'latest' # equivalent to '7_2'
     services:
       mysql:
         image: mysql:${{ matrix.mysql-version }}
@@ -58,6 +68,8 @@ jobs:
         with:
           ruby-version: ${{ matrix.ruby-version }}
           bundler-cache: true
+      - name: Show activerecord version
+        run: bundle info activerecord
       - name: Run tests
         run: |
           bundle exec rake
