@@ -15,7 +15,6 @@ jobs:
       fail-fast: false
       matrix:
         ruby-version:
-          - '3.0'
           - '3.1'
           - '3.2'
           - '3.3'
@@ -28,20 +27,13 @@ jobs:
           - '8_0'
           - 'latest'
         mysql-version:
-          - '5.7'
           - '8.0'
         exclude:
           # Exclude conditions that don't meat the minimal requirement
-          - ruby-version: '3.0'
-            activerecord-version: '7_2'
-          - ruby-version: '3.0'
-            activerecord-version: '8_0'
           - ruby-version: '3.1'
             activerecord-version: '8_0'
 
           # Exclude duplicate conditions
-          - ruby-version: '3.0'
-            activerecord-version: 'latest' # equivalent to '7_1'
           - ruby-version: '3.1'
             activerecord-version: 'latest' # equivalent to '7_2'
     services:
