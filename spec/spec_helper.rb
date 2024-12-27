@@ -26,11 +26,6 @@ RSpec.configure do |config|
     }
 
     user_for_replica = 'activerecord-debug_errors'
-    # For compatibility. Rails deprecated since 6.1 and removed this option since 7.1.
-    # https://github.com/rails/rails/pull/44827/commits/ad52c0a19714a1b87a7d0c626a8b364cf95414cf
-    if ActiveRecord::Base.respond_to?(:legacy_connection_handling)
-      ActiveRecord::Base.legacy_connection_handling = false
-    end
     ActiveRecord::Base.configurations = {
       default_env: {
         primary: base_db_config,
