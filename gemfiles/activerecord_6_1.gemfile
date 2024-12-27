@@ -1,2 +1,5 @@
 eval_gemfile("../Gemfile")
 gem "activerecord", "~> 6.1.0"
+gem "base64"
+gem "bigdecimal"
+gem "mutex_m"
