@@ -1,4 +1,8 @@
 require "bundler/setup"
+if Bundler.definition.specs.find { |s| s.name == "activerecord" }.version < Gem::Version.new("7.1")
+  # Workaround for https://github.com/rails/rails/issues/54260
+  require "logger"
+end
 require "activerecord/debug_errors"
 
 RSpec.configure do |config|
