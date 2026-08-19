@@ -23,6 +23,7 @@ jobs:
           - 'ruby' # latest stable release
         activerecord-version:
           - '8_0'
+          - '8_1'
           - 'latest'
         mysql-version:
           - '8.0' # Aurora MySQL version 3, which is compatible with MySQL 8.0, reaches EOL on April 30, 2028
